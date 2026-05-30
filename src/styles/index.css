@@ -1,0 +1,12 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* ReactFlow dark theme customization */
+.react-flow__edge-path {
+  stroke: rgba(255, 255, 255, 0.2);
+}
+
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke: rgba(16, 185, 129, 0.5);
+}
