@@ -87,7 +87,7 @@ export function HeroSection() {
             </Button>
             <Button asChild size="lg" variant="ghost"
               className="w-full sm:w-auto text-white/70 hover:bg-white/5 hover:text-white">
-              <Link to="/graph/demo">View Demo Graph</Link>
+              <Link to="/graph">View Demo Graph</Link>
             </Button>
           </motion.div>
         </motion.div>

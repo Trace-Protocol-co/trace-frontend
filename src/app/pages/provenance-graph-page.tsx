@@ -239,10 +239,9 @@ export function ProvenanceGraphPage() {
                           {node.mediaId.slice(0, 16)}…
                         </text>
                         {/* Pulse dot */}
-                        <motion.circle cx={pos.x + nodeW - 16} cy={pos.y + 16} r={4}
+                        <circle cx={pos.x + nodeW - 16} cy={pos.y + 16} r={5}
                           fill={cfg.glow.replace("0.3", "0.8")}
-                          animate={{ opacity: [1, 0.3, 1], r: [4, 6, 4] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+                          style={{ opacity: 0.8 }}
                         />
                       </motion.g>
                     );

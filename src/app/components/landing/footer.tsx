@@ -30,7 +30,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  to="/graph/demo"
+                  to="/graph"
                   className="text-white/80 transition-colors hover:text-white"
                 >
                   Provenance Graph
