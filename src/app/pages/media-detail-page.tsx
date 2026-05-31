@@ -5,7 +5,7 @@ import { ExternalLink, ArrowLeft, Shield, FileText } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 const INTEGRITY_CONFIG = {
   0: { color: "bg-emerald-500", text: "text-emerald-400", label: "VERIFIED ORIGINAL" },

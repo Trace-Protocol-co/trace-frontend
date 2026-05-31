@@ -4,7 +4,7 @@ import { Search, Filter, ExternalLink, ChevronLeft, ChevronRight, RefreshCw } fr
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router";
 
-const API = "http://localhost:3001";
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 const INTEGRITY_CONFIG = {
   0: { color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", label: "ORIGINAL" },

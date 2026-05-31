@@ -1,29 +1,29 @@
 /**
- * TRACE — zkLogin Integration
- * Wallet-free authentication using Google OAuth + Sui zkLogin.
+ * TRACE — zkLogin Integration (Browser-compatible, no Node globals)
  */
-
-import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 
 const SUI_RPC = "https://fullnode.testnet.sui.io:443";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
-const APP_URL = import.meta.env.VITE_APP_URL ?? "http://localhost:5173";
-const REDIRECT_URI = `${APP_URL}/zklogin/callback`;
+const APP_URL = import.meta.env.VITE_APP_URL ?? window.location.origin;
 const SESSION_KEY = "trace_zklogin_session";
 
-// Fetch current epoch directly via JSON-RPC (avoids SDK version issues)
 async function getCurrentEpoch(): Promise<number> {
   const res = await fetch(SUI_RPC, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0", id: 1,
-      method: "suix_getLatestSuiSystemState",
-      params: [],
-    }),
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "suix_getLatestSuiSystemState", params: [] }),
   });
   const data = await res.json();
   return Number(data.result?.epoch ?? 0);
+}
+
+function uint8ToHex(bytes: Uint8Array): string {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function base64urlEncode(bytes: Uint8Array): string {
+  const base64 = btoa(String.fromCharCode(...bytes));
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 export function getStoredSession(): Record<string, unknown> | null {
@@ -39,30 +39,40 @@ export function clearSession(): void {
 
 export async function initiateGoogleLogin(): Promise<void> {
   if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === "YOUR_GOOGLE_CLIENT_ID_HERE") {
-    alert("Google Client ID not configured. Set VITE_GOOGLE_CLIENT_ID in your .env file.");
+    alert("Google Client ID not configured. Add VITE_GOOGLE_CLIENT_ID to your environment variables.");
     return;
   }
 
   const epoch    = await getCurrentEpoch();
   const maxEpoch = epoch + 10;
-  const keypair  = new Ed25519Keypair();
-  const randomness = crypto.randomUUID().replace(/-/g, "");
 
-  const nonceInput = new TextEncoder().encode(
-    `${Buffer.from(keypair.getPublicKey().toRawBytes()).toString("hex")}:${maxEpoch}:${randomness}`
+  // Generate ephemeral keypair using Web Crypto
+  const keyPair = await crypto.subtle.generateKey(
+    { name: "Ed25519" } as EcKeyGenParams,
+    true,
+    ["sign", "verify"]
   );
-  const nonceHash = await crypto.subtle.digest("SHA-256", nonceInput);
-  const nonce = Buffer.from(nonceHash).toString("base64url").slice(0, 27);
+  const pubKeyBytes = new Uint8Array(await crypto.subtle.exportKey("raw", keyPair.publicKey));
+  const privKeyBytes = new Uint8Array(await crypto.subtle.exportKey("pkcs8", keyPair.privateKey));
+
+  const randomBytes = crypto.getRandomValues(new Uint8Array(16));
+  const randomness  = uint8ToHex(randomBytes);
+
+  // Nonce = base64url(sha256(pubkey + epoch + randomness))[:27]
+  const nonceInput  = new TextEncoder().encode(`${uint8ToHex(pubKeyBytes)}:${maxEpoch}:${randomness}`);
+  const nonceHash   = new Uint8Array(await crypto.subtle.digest("SHA-256", nonceInput));
+  const nonce       = base64urlEncode(nonceHash).slice(0, 27);
 
   sessionStorage.setItem(SESSION_KEY, JSON.stringify({
     maxEpoch,
     randomness,
-    ephemeralPrivateKey: Buffer.from(keypair.getSecretKey()).toString("hex"),
+    pubKeyHex:  uint8ToHex(pubKeyBytes),
+    privKeyHex: uint8ToHex(privKeyBytes),
   }));
 
   const params = new URLSearchParams({
     client_id:     GOOGLE_CLIENT_ID,
-    redirect_uri:  REDIRECT_URI,
+    redirect_uri:  `${APP_URL}/zklogin/callback`,
     response_type: "id_token",
     scope:         "openid email profile",
     nonce,
@@ -74,17 +84,15 @@ export async function initiateGoogleLogin(): Promise<void> {
 export async function handleOAuthCallback(jwt: string): Promise<Record<string, unknown> | null> {
   try {
     const stored = getStoredSession();
-    if (!stored?.ephemeralPrivateKey) return null;
+    if (!stored) return null;
 
     const [, payloadB64] = jwt.split(".");
     const payload = JSON.parse(atob(payloadB64));
     const { sub, iss, email } = payload;
 
-    const addrBytes = await crypto.subtle.digest(
-      "SHA-256", new TextEncoder().encode(`${iss}:${sub}:trace-salt`)
-    );
-    const address = "0x" + Array.from(new Uint8Array(addrBytes))
-      .slice(0, 32).map(b => b.toString(16).padStart(2, "0")).join("");
+    const addrInput = new TextEncoder().encode(`${iss}:${sub}:trace-salt`);
+    const addrHash  = new Uint8Array(await crypto.subtle.digest("SHA-256", addrInput));
+    const address   = "0x" + uint8ToHex(addrHash).slice(0, 64);
 
     const session = { ...stored, address, email, provider: "google", jwt };
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
