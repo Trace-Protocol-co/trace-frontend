@@ -128,7 +128,7 @@ export function MediaDetailPage() {
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-3">
             <Button className="flex-1 bg-white text-black hover:bg-white/90 font-semibold"
-              onClick={() => window.open(`/v1/media/${id}/certificate`, "_blank")}>
+              onClick={() => window.open(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/media/${id}/certificate`, "_blank")}>
               <FileText className="mr-2 size-4" />
               View Certificate
             </Button>

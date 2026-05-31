@@ -21,10 +21,6 @@ export default defineConfig({
     alias: { '@': path.resolve(__dirname, './src') },
   },
   assetsInclude: ['**/*.svg', '**/*.csv'],
-  define: {
-    'process.env': {},
-    'global': 'globalThis', // Fixes internal crypto dependencies in blockchain SDKs
-  },
   server: {
     port: 5173,
     proxy: {
@@ -33,5 +29,16 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  build: {
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  preview: {
+    port: 4173,
   },
 })
