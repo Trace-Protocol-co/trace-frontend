@@ -309,7 +309,7 @@ export function UploadPage() {
                   )}
 
                   <Button onClick={handleUpload}
-                    disabled={!file || loading || !isAuthenticated()}
+                    disabled={!file || phase === "uploading" || !isAuthenticated()}
                     className="w-full bg-white text-black hover:bg-white/90 py-6 text-base font-semibold disabled:opacity-40">
                     {!isAuthenticated() ? "Sign In Required" : "Anchor to Chain"}
                   </Button>

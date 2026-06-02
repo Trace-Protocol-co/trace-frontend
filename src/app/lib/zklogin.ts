@@ -4,7 +4,7 @@
 
 const SUI_RPC = "https://fullnode.testnet.sui.io:443";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
-const APP_URL = import.meta.env.VITE_APP_URL ?? window.location.origin;
+const APP_URL = (import.meta.env.VITE_APP_URL ?? window.location.origin).trim().replace(/\/$/, "");
 const SESSION_KEY = "trace_zklogin_session";
 
 async function getCurrentEpoch(): Promise<number> {
