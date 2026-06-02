@@ -37,8 +37,10 @@ export function ZkLoginCallbackPage() {
 
         if (session) {
           setStatus("success");
-          // Small delay to show success state, then redirect to upload
-          setTimeout(() => navigate("/upload"), 1200);
+          // Use replace to navigate — forces full re-render of Root/navbar
+          setTimeout(() => {
+            window.location.replace("/upload");
+          }, 1000);
         } else {
           setError("Failed to process authentication");
           setStatus("error");

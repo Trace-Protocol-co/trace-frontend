@@ -28,11 +28,34 @@ export function ZkLoginButton({ onLogin, onLogout, className = "" }: ZkLoginButt
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      setAuthenticated(true);
-      setAddress(getZkLoginAddress());
-      setEmail(getZkLoginEmail());
+    function checkAuth() {
+      if (isAuthenticated()) {
+        setAuthenticated(true);
+        setAddress(getZkLoginAddress());
+        setEmail(getZkLoginEmail());
+      } else {
+        setAuthenticated(false);
+        setAddress(null);
+        setEmail(null);
+      }
     }
+
+    // Check on mount
+    checkAuth();
+
+    // Re-check when window gets focus (after OAuth callback redirect)
+    window.addEventListener("focus", checkAuth);
+    // Re-check on storage changes (sessionStorage doesn't fire storage events
+    // within the same tab, so we poll lightly after navigation)
+    const interval = setInterval(checkAuth, 500);
+    // Stop polling after 5 seconds
+    const timeout = setTimeout(() => clearInterval(interval), 5000);
+
+    return () => {
+      window.removeEventListener("focus", checkAuth);
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleLogin = async () => {
