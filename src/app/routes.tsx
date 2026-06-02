@@ -8,21 +8,23 @@ import { MediaDetailPage } from "./pages/media-detail-page";
 import { ExtensionPage } from "./pages/extension-page";
 import { ApiPage } from "./pages/api-page";
 import { ExplorerPage } from "./pages/explorer-page";
+import { ZkLoginCallbackPage } from "./pages/zklogin-callback-page";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
     children: [
-      { index: true,          Component: LandingPage },
-      { path: "upload",       Component: UploadPage },
-      { path: "verify",       Component: VerifyPage },
-      { path: "graph/:id",    Component: ProvenanceGraphPage },
-      { path: "graph",        Component: ProvenanceGraphPage },
-      { path: "media/:id",    Component: MediaDetailPage },
-      { path: "extension",    Component: ExtensionPage },
-      { path: "api",          Component: ApiPage },
-      { path: "explorer",     Component: ExplorerPage },
+      { index: true,              Component: LandingPage },
+      { path: "upload",           Component: UploadPage },
+      { path: "verify",           Component: VerifyPage },
+      { path: "graph/:id",        Component: ProvenanceGraphPage },
+      { path: "graph",            Component: ProvenanceGraphPage },
+      { path: "media/:id",        Component: MediaDetailPage },
+      { path: "extension",        Component: ExtensionPage },
+      { path: "api",              Component: ApiPage },
+      { path: "explorer",         Component: ExplorerPage },
+      { path: "zklogin/callback", Component: ZkLoginCallbackPage },
     ],
   },
 ]);
