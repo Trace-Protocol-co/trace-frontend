@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Upload, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { Upload, CheckCircle2, Loader2, XCircle, LogIn } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router";
 import { computeSHA256, computePHash, registerMedia, type RegisterResult } from "../lib/api";
+import { isAuthenticated, getZkLoginAddress, getZkLoginEmail, initiateGoogleLogin } from "../lib/zklogin";
 
 const EDIT_TYPES = [
   { value: "0", label: "ORIGINAL" },
@@ -94,7 +95,11 @@ export function UploadPage() {
     }, 600);
 
     try {
-      const res = await registerMedia({ file, editType, aiScore: String(aiScore), description, parentId });
+      const res = await registerMedia({
+        file, editType, aiScore: String(aiScore), description, parentId,
+        creatorAddress: getZkLoginAddress() ?? undefined,
+        creatorEmail: getZkLoginEmail() ?? undefined,
+      });
       clearInterval(interval);
       setProgress(100);
       setResult(res);
@@ -152,7 +157,45 @@ export function UploadPage() {
           {/* IDLE + file selection */}
           {(phase === "idle" || phase === "hashing") && (
             <div className="p-12 space-y-6">
-              {/* Drop zone */}
+
+              {/* Auth gate — must sign in to upload */}
+              {!isAuthenticated() && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 text-center"
+                >
+                  <LogIn className="mx-auto mb-3 size-8 text-amber-400" />
+                  <h3 className="mb-2 font-semibold text-white">Sign In Required</h3>
+                  <p className="mb-4 text-sm text-white/60">
+                    You must sign in with Google to register media. This anchors your identity
+                    to the on-chain record — proving exactly who minted the truth hash.
+                  </p>
+                  <Button
+                    className="bg-white text-black hover:bg-white/90 font-semibold"
+                    onClick={() => initiateGoogleLogin()}
+                  >
+                    Sign in with Google to Continue
+                  </Button>
+                  <p className="mt-3 text-xs text-white/30">
+                    Verification (reading) is always free and requires no sign-in.
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Show creator identity when signed in */}
+              {isAuthenticated() && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3"
+                >
+                  <div className="size-2 rounded-full bg-emerald-400" />
+                  <div className="flex-1">
+                    <div className="text-xs text-white/40">Registering as</div>
+                    <div className="text-sm font-mono text-emerald-400">{getZkLoginEmail()}</div>
+                    <div className="text-xs text-white/30 truncate">{getZkLoginAddress()}</div>
+                  </div>
+                </motion.div>
+              )}
               <div
                 className={`cursor-pointer rounded-xl border-2 border-dashed ${
                   isDragging ? "border-emerald-500 bg-emerald-500/10" : "border-white/20"
@@ -266,8 +309,9 @@ export function UploadPage() {
                   )}
 
                   <Button onClick={handleUpload}
-                    className="w-full bg-white text-black hover:bg-white/90 py-6 text-base font-semibold">
-                    Anchor to Chain
+                    disabled={!file || loading || !isAuthenticated()}
+                    className="w-full bg-white text-black hover:bg-white/90 py-6 text-base font-semibold disabled:opacity-40">
+                    {!isAuthenticated() ? "Sign In Required" : "Anchor to Chain"}
                   </Button>
                 </motion.div>
               )}

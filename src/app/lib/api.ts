@@ -72,6 +72,7 @@ export async function verifyMedia(file: File): Promise<VerifyResult> {
 
 export async function registerMedia(params: {
   file: File; editType: string; aiScore: string; description: string; parentId?: string;
+  creatorAddress?: string; creatorEmail?: string;
 }): Promise<RegisterResult> {
   const fd = new FormData();
   fd.append("file", params.file);
@@ -79,6 +80,8 @@ export async function registerMedia(params: {
   fd.append("ai_score", params.aiScore);
   fd.append("description", params.description);
   if (params.parentId?.trim()) fd.append("parent_id", params.parentId.trim());
+  if (params.creatorAddress) fd.append("creator_address", params.creatorAddress);
+  if (params.creatorEmail)   fd.append("creator_email", params.creatorEmail);
   const res = await fetch(`${API}/v1/register`, { method: "POST", body: fd });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `Registration failed (${res.status})`);
