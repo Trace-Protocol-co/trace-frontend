@@ -45,6 +45,7 @@ export function UploadPage() {
   const [parentId, setParentId] = useState("");
   const [gps, setGps] = useState<{ lat: number; lng: number } | null>(null);
   const [gpsLoading, setGpsLoading] = useState(false);
+  const [mediaType, setMediaType] = useState("image");
   const [result, setResult] = useState<RegisterResult | null>(null);
   const [error, setError] = useState("");
 
@@ -52,6 +53,11 @@ export function UploadPage() {
     setFile(f);
     setResult(null);
     setError("");
+    // Auto-detect media type
+    const detectedType = f.type.startsWith("video") ? "video"
+                       : f.type.startsWith("audio") ? "audio"
+                       : "image";
+    setMediaType(detectedType);
     setPhase("hashing");
     try {
       const hash = await computeSHA256(f);
@@ -247,6 +253,27 @@ export function UploadPage() {
               {/* Form */}
               {file && sha256 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+                  {/* Media Type */}
+                  <div>
+                    <label className="mb-2 block text-sm text-white/60">Media Type</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: "image", label: "🖼 Image" },
+                        { value: "video", label: "🎥 Video" },
+                        { value: "audio", label: "🎵 Audio" },
+                      ].map((t) => (
+                        <button key={t.value}
+                          onClick={() => setMediaType(t.value)}
+                          className={`rounded-lg border py-2 text-sm transition-all
+                            ${mediaType === t.value
+                              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
+                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"}`}>
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Edit type */}
                   <div>
                     <label className="mb-2 block text-sm text-white/60">Edit Type</label>
