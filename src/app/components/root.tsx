@@ -1,16 +1,16 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
-import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ZkLoginButton } from "./zklogin-button";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { to: "/verify",   label: "Verify" },
-  { to: "/upload",   label: "Upload" },
-  { to: "/explorer", label: "Explorer" },
-  { to: "/extension",label: "Extension" },
-  { to: "/api",      label: "API" },
+  { to: "/",          label: "Home" },
+  { to: "/verify",    label: "Verify" },
+  { to: "/upload",    label: "Upload" },
+  { to: "/explorer",  label: "Explorer" },
+  { to: "/extension", label: "Extension" },
+  { to: "/api",       label: "API" },
 ];
 
 export function Root() {
@@ -19,10 +19,8 @@ export function Root() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  // Add shadow on scroll
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handler);
@@ -31,10 +29,10 @@ export function Root() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/90 backdrop-blur-xl transition-shadow ${scrolled ? "shadow-lg shadow-black/50" : ""}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
+
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 shrink-0">
               <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500">
@@ -46,24 +44,18 @@ export function Root() {
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               {NAV_LINKS.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
+                <Link key={l.to} to={l.to}
                   className={`text-sm transition-colors hover:text-white ${
                     location.pathname === l.to ? "text-white font-medium" : "text-white/70"
-                  }`}
-                >
+                  }`}>
                   {l.label}
                 </Link>
               ))}
-              <ZkLoginButton className="mr-2" />
-              <Button
-                size="sm"
-                className="bg-white text-black hover:bg-white/90 font-semibold"
-                onClick={() => navigate("/upload")}
-              >
-                Get Started
-              </Button>
+            </div>
+
+            {/* Desktop right — zkLogin only, no Get Started button */}
+            <div className="hidden md:flex items-center">
+              <ZkLoginButton />
             </div>
 
             {/* Mobile menu button */}
@@ -88,23 +80,16 @@ export function Root() {
             >
               <div className="mx-auto max-w-7xl px-4 py-4 space-y-1">
                 {NAV_LINKS.map((l) => (
-                  <Link
-                    key={l.to}
-                    to={l.to}
+                  <Link key={l.to} to={l.to}
                     className={`block px-3 py-3 rounded-lg text-sm transition-colors hover:bg-white/5 hover:text-white ${
                       location.pathname === l.to ? "text-white bg-white/5" : "text-white/70"
-                    }`}
-                  >
+                    }`}>
                     {l.label}
                   </Link>
                 ))}
-                <div className="pt-2">
-                  <Button
-                    className="w-full bg-white text-black hover:bg-white/90 font-semibold"
-                    onClick={() => { navigate("/upload"); setMobileOpen(false); }}
-                  >
-                    Get Started — Register Your Media
-                  </Button>
+                {/* zkLogin visible on mobile */}
+                <div className="pt-3 border-t border-white/10">
+                  <ZkLoginButton className="w-full justify-center" />
                 </div>
               </div>
             </motion.div>
@@ -112,7 +97,6 @@ export function Root() {
         </AnimatePresence>
       </nav>
 
-      {/* Page content */}
       <div className="pt-16">
         <Outlet />
       </div>
