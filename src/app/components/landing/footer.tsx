@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Github, ExternalLink } from "lucide-react";
 
-const GITHUB = "https://github.com/Trace-Protocol-co";
+const GITHUB = "https://github.com/anjolaoladele/trace-protocol";
 
 export function Footer() {
   return (
@@ -103,14 +103,18 @@ export function Footer() {
             <span className="text-xl font-semibold text-white">TRACE</span>
           </Link>
           <div className="text-sm text-white/40 text-center">
-            © 2026 TRACE Protocol · Built on Sui + Walrus ·
+            © 2026 TRACE Protocol · Built on Sui + Walrus · Sui Hackathon 2025
           </div>
           <div className="flex gap-4 text-sm">
             <a href={GITHUB} target="_blank" rel="noopener noreferrer"
               className="text-white/40 hover:text-white transition-colors">GitHub</a>
-            
+            <a href="https://trace-cbvb.onrender.com/v1/health" target="_blank" rel="noopener noreferrer"
+              className="text-white/40 hover:text-white transition-colors">Status</a>
+          </div>
         </div>
       </div>
-    </footer>
+    </div>
+  );
+}
   );
 }
