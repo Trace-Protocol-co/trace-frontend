@@ -9,6 +9,7 @@ import { ExtensionPage } from "./pages/extension-page";
 import { ApiPage } from "./pages/api-page";
 import { ExplorerPage } from "./pages/explorer-page";
 import { ZkLoginCallbackPage } from "./pages/zklogin-callback-page";
+import { OrgPage } from "./pages/org-page";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: "extension",        Component: ExtensionPage },
       { path: "api",              Component: ApiPage },
       { path: "explorer",         Component: ExplorerPage },
+      { path: "org",              Component: OrgPage },
       { path: "zklogin/callback", Component: ZkLoginCallbackPage },
     ],
   },
