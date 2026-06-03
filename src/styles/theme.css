@@ -179,3 +179,20 @@
     line-height: 1.5;
   }
 }
+
+/* ── TRACE Status Colors (for extension components) ─────────────────────── */
+:root {
+  --verified:     #10b981;
+  --modified:     #f59e0b;
+  --unverified:   #ef4444;
+  --ai-generated: #8b5cf6;
+  --protocol:     #3b82f6;
+}
+
+@theme inline {
+  --color-verified:     var(--verified);
+  --color-modified:     var(--modified);
+  --color-unverified:   var(--unverified);
+  --color-ai-generated: var(--ai-generated);
+  --color-protocol:     var(--protocol);
+}
