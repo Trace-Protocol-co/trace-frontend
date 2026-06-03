@@ -18,51 +18,66 @@ const EDIT_TYPES = [
 ];
 
 // Estimate AI generation probability from file entropy analysis
-async function estimateAIScore(file: File): Promise<number> {
+// AI Detection — multi-signal: EXIF analysis, metadata, filename patterns, entropy
+async function estimateAIScore(file: File): Promise<{ score: number; signals: string[] }> {
+  const signals: string[] = [];
   try {
-    const slice = file.slice(0, Math.min(32768, file.size));
-    const buf   = await slice.arrayBuffer();
+    const buf   = await file.arrayBuffer();
     const bytes = new Uint8Array(buf);
-
-    // Byte frequency entropy
-    const freq = new Array(256).fill(0);
-    bytes.forEach(b => freq[b]++);
-    const len = bytes.length;
-    let entropy = 0;
-    freq.forEach(f => { if (f > 0) { const p = f / len; entropy -= p * Math.log2(p); } });
-
-    // AI-generated images (GANs, diffusion) tend to have:
-    // - Very high entropy (close to 8.0 bits/byte after JPEG compression)
-    // - Very uniform byte distribution
-    const normalizedEntropy = entropy / 8.0;
-
-    // JPEG header check — AI images often have specific DCT patterns
     const isJpeg = bytes[0] === 0xFF && bytes[1] === 0xD8;
     const isPng  = bytes[0] === 0x89 && bytes[1] === 0x50;
 
-    let score = 0;
+    // Signal 1: Filename patterns from AI generators
+    const name = file.name.toLowerCase();
+    const aiNames = [/midjourney/i,/stable.?diffusion/i,/dall.?e/i,/firefly/i,/generated/i,/flux/i,/ideogram/i,/leonardoai/i,/\d{10,}_\d+/];
+    if (aiNames.some(p => p.test(name))) signals.push("AI generator filename pattern");
 
-    if (normalizedEntropy > 0.97) {
-      // Very high entropy = likely AI (diffusion models)
-      score = Math.round((normalizedEntropy - 0.97) * 100000);
-    } else if (normalizedEntropy > 0.94) {
-      // Medium-high = possible AI
-      score = Math.round((normalizedEntropy - 0.94) * 50000);
-    } else {
-      // Lower entropy = likely human photograph
-      score = Math.round(Math.max(0, normalizedEntropy - 0.85) * 10000);
+    // Signal 2: EXIF metadata analysis (JPEG only)
+    let hasCameraModel = false;
+    let hasExif = false;
+    if (isJpeg) {
+      const str = new TextDecoder("latin1").decode(bytes.slice(0, 65536));
+      hasExif = str.includes("Exif");
+      hasCameraModel = /Canon|Nikon|Sony|Fuji|Olympus|Panasonic|Leica|Apple|Samsung|Google/i.test(str);
+      if (/Midjourney|Stable Diffusion|DALL-E|Firefly|ComfyUI|Automatic1111|NovelAI/i.test(str))
+        signals.push("AI software signature in EXIF");
+      if (!hasExif && file.size > 200000) signals.push("No EXIF in large JPEG");
+      if (hasExif && !hasCameraModel) signals.push("No camera model in EXIF");
+      if (hasCameraModel) signals.push("Real camera confirmed");
     }
 
-    // PNG files from AI generators tend to score higher
-    if (isPng && score > 1000) score = Math.min(10000, score * 1.3);
+    // Signal 3: PNG AI metadata chunk (Stable Diffusion embeds prompts)
+    if (isPng) {
+      const str = new TextDecoder("latin1").decode(bytes.slice(0, 16384));
+      if (/parameters|negative_prompt|steps:|sampler|cfg scale/i.test(str))
+        signals.push("Stable Diffusion prompt data found");
+    }
 
-    return Math.min(10000, Math.max(0, Math.round(score)));
+    // Signal 4: Entropy
+    const sample = bytes.slice(0, Math.min(65536, bytes.length));
+    const freq   = new Array(256).fill(0);
+    sample.forEach(b => freq[b]++);
+    let entropy = 0;
+    freq.forEach(f => { if (f > 0) { const p = f / sample.length; entropy -= p * Math.log2(p); } });
+    const normalizedEntropy = entropy / 8.0;
+    if (normalizedEntropy > 0.975) signals.push("High entropy pattern");
+
+    // Score calculation
+    let score = 0;
+    if (signals.includes("AI software signature in EXIF"))     score += 9000;
+    if (signals.includes("Stable Diffusion prompt data found")) score += 9500;
+    if (signals.includes("AI generator filename pattern"))      score += 3500;
+    if (signals.includes("No EXIF in large JPEG"))              score += 2500;
+    if (signals.includes("No camera model in EXIF"))            score += 2000;
+    if (signals.includes("High entropy pattern") && score < 2000) score += 2000;
+    if (signals.includes("Real camera confirmed"))              score = Math.max(0, score - 4000);
+
+    return { score: Math.min(10000, Math.max(0, score)), signals };
   } catch {
-    return 0;
+    return { score: 0, signals: ["Analysis failed"] };
   }
 }
 
-function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -86,6 +101,7 @@ export function UploadPage() {
   const [phash, setPhash] = useState("");
   const [editType, setEditType] = useState("0");
   const [aiScore, setAiScore] = useState(0);
+  const [aiSignals, setAiSignals] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
   const [gps, setGps] = useState<{ lat: number; lng: number } | null>(null);
@@ -110,8 +126,9 @@ export function UploadPage() {
       setPhash(computePHash(hash));
 
       // AI score estimation from file entropy
-      const estimatedScore = await estimateAIScore(f);
-      setAiScore(estimatedScore);
+      const { score, signals } = await estimateAIScore(f);
+      setAiScore(score);
+      setAiSignals(signals);
 
       setPhase("idle");
     } catch {
@@ -334,15 +351,29 @@ export function UploadPage() {
                         aiScore > 3000 ? "bg-amber-500" : "bg-emerald-500"
                       }`} style={{ width: `${aiScore / 100}%` }} />
                     </div>
-                    <div className="flex justify-between text-xs text-white/30 mb-2">
+                    <div className="flex justify-between text-xs text-white/30 mb-3">
                       <span>0% Human</span>
                       <span className="text-white/50 font-medium">{(aiScore / 100).toFixed(0)}% synthetic probability</span>
                       <span>100% AI</span>
                     </div>
+                    {/* Detection signals */}
+                    {aiSignals.length > 0 && (
+                      <div className="space-y-1 mb-3 border-t border-white/10 pt-3">
+                        {aiSignals.map((signal, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs">
+                            <span className={signal.includes("confirmed") || signal.includes("Real camera")
+                              ? "text-emerald-400" : "text-amber-400"}>
+                              {signal.includes("confirmed") || signal.includes("Real camera") ? "✓" : "⚠"}
+                            </span>
+                            <span className="text-white/50">{signal}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <input type="range" min="0" max="10000" step="100" value={aiScore}
                       onChange={(e) => setAiScore(Number(e.target.value))}
                       className="w-full accent-emerald-500" />
-                    <p className="mt-1 text-xs text-white/30">Auto-estimated from file analysis. Adjust if needed.</p>
+                    <p className="mt-1 text-xs text-white/30">Auto-detected from file metadata. Adjust if needed.</p>
                   </div>
 
                   {/* Description */}
