@@ -274,66 +274,16 @@ export function UploadPage() {
                     </div>
                   </div>
 
-                  {/* Edit type */}
-                  <div>
-                    <label className="mb-2 block text-sm text-white/60">Edit Type</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {EDIT_TYPES.map((t) => (
-                        <button key={t.value} onClick={() => setEditType(t.value)}
-                          className={`rounded-lg border py-2 text-xs font-mono transition-all
-                            ${editType === t.value
-                              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"}`}>
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* AI Score */}
+                  {/* Parent ID — only show if user explicitly wants to register a derivative */}
                   <div>
                     <label className="mb-2 block text-sm text-white/60">
-                      AI Score — <span className="text-white">{(aiScore / 100).toFixed(1)}%</span> synthetic probability
+                      Parent Media ID <span className="text-white/30">(optional — only for derivatives)</span>
                     </label>
-                    <input type="range" min="0" max="10000" step="100" value={aiScore}
-                      onChange={(e) => setAiScore(Number(e.target.value))}
-                      className="w-full accent-emerald-500" />
-                    <div className="mt-1 flex justify-between text-xs text-white/30">
-                      <span>0% Human</span><span>100% Synthetic</span>
-                    </div>
+                    <input type="text" value={parentId} onChange={(e) => setParentId(e.target.value)}
+                      placeholder="0x... leave empty for original media"
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30" />
+                    <p className="mt-1 text-xs text-white/30">If this is an edit of existing media, paste the original media ID here.</p>
                   </div>
-
-                  {/* GPS — optional location capture */}
-                  <div>
-                    <label className="mb-2 block text-sm text-white/60">GPS Location <span className="text-white/30">(optional)</span></label>
-                    <div className="flex flex-wrap gap-2 items-center">
-                      <button onClick={captureGPS} disabled={gpsLoading}
-                        className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white hover:bg-white/10 transition-all disabled:opacity-50">
-                        {gpsLoading ? "Locating..." : gps ? "📍 Captured" : "📍 Capture GPS"}
-                      </button>
-                      {gps && <span className="font-mono text-xs text-white/40">{gps.lat.toFixed(5)}, {gps.lng.toFixed(5)}</span>}
-                      {gps && <button onClick={() => setGps(null)} className="text-xs text-white/30 hover:text-white/60">✕ Clear</button>}
-                    </div>
-                    <p className="mt-1 text-xs text-white/30">User-controlled. GPS stored on-chain only if shared.</p>
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <label className="mb-2 block text-sm text-white/60">Description</label>
-                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)}
-                      placeholder="e.g. Lagos protest footage — original capture"
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30" />
-                  </div>
-
-                  {/* Parent ID (only for derivatives) */}
-                  {editType !== "0" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                      <label className="mb-2 block text-sm text-white/60">Parent Media ID</label>
-                      <input type="text" value={parentId} onChange={(e) => setParentId(e.target.value)}
-                        placeholder="0x..."
-                        className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 font-mono text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30" />
-                    </motion.div>
-                  )}
 
                   <Button onClick={handleUpload}
                     disabled={!file || phase === "uploading" || !isAuthenticated()}

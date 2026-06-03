@@ -229,7 +229,7 @@ export function ExplorerPage() {
                                 className="text-xs text-white/40 hover:text-white transition-colors font-mono">
                                 GRAPH
                               </button>
-                              <button onClick={() => window.open(`/v1/media/${item.mediaId}/certificate`, "_blank")}
+                              <button onClick={() => window.open(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/media/${item.mediaId}/certificate`, "_blank")}
                                 className="text-xs text-white/40 hover:text-white transition-colors font-mono">
                                 CERT
                               </button>

@@ -166,6 +166,12 @@ export function ProvenanceGraphPage() {
 
           {!loading && nodes.length > 0 && (
             <div className="p-8">
+              {/* Click hint */}
+              <div className="mb-4 flex items-center gap-2 text-xs text-white/30 font-mono">
+                <span className="size-2 rounded-full bg-emerald-500/50 inline-block" />
+                Click any node to inspect its provenance details
+              </div>
+
               {/* SVG Graph */}
               <div className="overflow-x-auto">
                 <svg width={svgW} height={svgH}>
