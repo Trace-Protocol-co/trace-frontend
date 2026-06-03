@@ -160,7 +160,7 @@ export function ExplorerPage() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
 
           {/* Desktop table */}
-          <div className="hidden sm:block overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto w-full">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5">

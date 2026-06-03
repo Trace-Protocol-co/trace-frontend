@@ -162,7 +162,7 @@ export function UploadPage() {
 
           {/* IDLE + file selection */}
           {(phase === "idle" || phase === "hashing") && (
-            <div className="p-12 space-y-6">
+            <div className="p-4 sm:p-12 space-y-6">
 
               {/* Auth gate — must sign in to upload */}
               {!isAuthenticated() && (
@@ -205,7 +205,7 @@ export function UploadPage() {
               <div
                 className={`cursor-pointer rounded-xl border-2 border-dashed ${
                   isDragging ? "border-emerald-500 bg-emerald-500/10" : "border-white/20"
-                } p-16 transition-all hover:border-emerald-500/50 hover:bg-white/5`}
+                } p-8 sm:p-16 transition-all hover:border-emerald-500/50 hover:bg-white/5`}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
@@ -309,7 +309,7 @@ export function UploadPage() {
           {/* UPLOADING */}
           {phase === "uploading" && (
             <div className="p-12">
-              <div className="flex flex-col items-center gap-6 py-12 text-center">
+              <div className="flex flex-col items-center gap-6 py-8 sm:py-12 text-center">
                 <Loader2 className="size-16 animate-spin text-cyan-500" />
                 <div>
                   <div className="mb-2 text-2xl font-semibold text-white">Anchoring to chain...</div>
