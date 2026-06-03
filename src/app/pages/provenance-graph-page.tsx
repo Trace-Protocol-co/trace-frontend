@@ -111,7 +111,28 @@ export function ProvenanceGraphPage() {
               </p>
             </div>
             <Button variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-              onClick={() => { if (graph) { /* export SVG */ } }}>
+              onClick={() => {
+                if (!graph) return;
+                const exportData = {
+                  mediaId: id,
+                  exportedAt: new Date().toISOString(),
+                  nodes: graph.nodes,
+                  edges: graph.edges,
+                  summary: {
+                    totalNodes: graph.nodes.length,
+                    totalEdges: graph.edges.length,
+                    rootNode: graph.nodes[0]?.mediaId,
+                    creator: graph.nodes[0]?.creator,
+                  }
+                };
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement("a");
+                a.href     = url;
+                a.download = `trace-provenance-${id?.slice(0, 12)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
               <ExternalLink className="mr-2 size-4" />
               Export Graph
             </Button>
