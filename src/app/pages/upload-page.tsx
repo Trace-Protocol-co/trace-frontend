@@ -253,25 +253,16 @@ export function UploadPage() {
               {/* Form */}
               {file && sha256 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-                  {/* Media Type */}
-                  <div>
-                    <label className="mb-2 block text-sm text-white/60">Media Type</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { value: "image", label: "🖼 Image" },
-                        { value: "video", label: "🎥 Video" },
-                        { value: "audio", label: "🎵 Audio" },
-                      ].map((t) => (
-                        <button key={t.value}
-                          onClick={() => setMediaType(t.value)}
-                          className={`rounded-lg border py-2 text-sm transition-all
-                            ${mediaType === t.value
-                              ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"}`}>
-                          {t.label}
-                        </button>
-                      ))}
+                  {/* Media Type — auto detected, just display it */}
+                  <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+                    <span className="text-lg">
+                      {mediaType === "video" ? "🎥" : mediaType === "audio" ? "🎵" : "🖼"}
+                    </span>
+                    <div>
+                      <div className="text-sm text-white font-medium capitalize">{mediaType} detected</div>
+                      <div className="text-xs text-white/40">{file?.type || "unknown"} · {file ? (file.size / (1024*1024)).toFixed(2) : "—"} MB</div>
                     </div>
+                    <span className="ml-auto text-xs text-emerald-400 font-mono">AUTO</span>
                   </div>
 
                   {/* Parent ID — only show if user explicitly wants to register a derivative */}
