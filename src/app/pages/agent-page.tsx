@@ -115,9 +115,15 @@ export function AgentPage() {
 
             {loading ? (
               <div className="text-white/40 text-sm">Loading agent status...</div>
-            ) : !status ? (
-              <div className="text-rose-400 text-sm">
-                Agent offline — start with: <code className="bg-white/10 px-2 py-0.5 rounded">npm run agent</code>
+            ) : !status || status.status === "offline" ? (
+              <div className="space-y-3">
+                <div className="text-amber-400 text-sm font-medium">
+                  Agent scanning paused — memory preserved on Walrus
+                </div>
+                <div className="text-white/40 text-xs">
+                  The agent runs on the backend server. Start it with:
+                  <code className="ml-2 bg-white/10 px-2 py-0.5 rounded text-white/70">npm run agent</code>
+                </div>
               </div>
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
