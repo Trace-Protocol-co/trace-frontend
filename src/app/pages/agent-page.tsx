@@ -23,6 +23,8 @@ export function AgentPage() {
   const [verifyResult, setVerifyResult] = useState<{ verdict: string; confidence: number } | null>(null);
   const [verifying, setVerifying] = useState(false);
 
+  const [recallResults, setRecallResults] = useState<{ text: string; blob_id: string; distance: number }[]>([]);
+
   const fetchStatus = async () => {
     try {
       const res  = await fetch(API_URL + "/agent/status");
@@ -114,31 +116,37 @@ export function AgentPage() {
             </div>
 
             {loading ? (
-              <div className="text-white/40 text-sm">Loading agent status...</div>
-            ) : !status || status.status === "offline" ? (
-              <div className="space-y-3">
-                <div className="text-amber-400 text-sm font-medium">
-                  Agent scanning paused — memory preserved on Walrus
-                </div>
-                <div className="text-white/40 text-xs">
-                  The agent runs on the backend server. Start it with:
-                  <code className="ml-2 bg-white/10 px-2 py-0.5 rounded text-white/70">npm run agent</code>
-                </div>
-              </div>
+              <div className="text-white/40 text-sm animate-pulse">Connecting to agent...</div>
+            ) : !status ? (
+              <div className="text-rose-400 text-sm">Cannot reach backend API</div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { label: "Total Scanned",   value: status.total_scanned,  color: "text-white" },
-                  { label: "Verified",         value: status.total_verified, color: "text-emerald-400" },
-                  { label: "Flagged",          value: status.total_flagged,  color: "text-rose-400" },
-                  { label: "Sessions Run",     value: status.sessions_count, color: "text-blue-400" },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl border border-white/10 bg-black/50 p-4 text-center">
-                    <div className={`text-3xl font-bold mb-1 ${stat.color}`}>{stat.value}</div>
-                    <div className="text-xs text-white/40">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+              <>
+                {/* Status badge */}
+                <div className={`inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+                  status.status === "active"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                    : "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                }`}>
+                  <div className={`size-1.5 rounded-full ${status.status === "active" ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+                  {status.status === "active" ? "Agent Active" : "Agent Ready — awaiting first scan"}
+                </div>
+                {status.message && (
+                  <p className="text-xs text-white/40 mb-4">{status.message}</p>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {[
+                    { label: "Total Scanned",   value: status.total_scanned,   color: "text-white" },
+                    { label: "Verified",         value: status.total_verified,  color: "text-emerald-400" },
+                    { label: "Flagged",          value: (status.total_unverified ?? 0) + (status.total_ai ?? 0), color: "text-rose-400" },
+                    { label: "Sessions Run",     value: status.sessions_run,    color: "text-blue-400" },
+                  ].map((stat) => (
+                    <div key={stat.label} className="rounded-xl border border-white/10 bg-black/50 p-4 text-center">
+                      <div className={`text-3xl font-bold mb-1 ${stat.color}`}>{stat.value}</div>
+                      <div className="text-xs text-white/40">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </motion.div>
@@ -174,6 +182,58 @@ export function AgentPage() {
             </div>
           </motion.div>
         )}
+
+        {/* MemWal Semantic Recall */}
+        <motion.div className="mb-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+          <div className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Bot className="size-5 text-violet-400" />
+              <h2 className="font-semibold">MemWal Semantic Memory Search</h2>
+              <span className="text-xs text-violet-400 border border-violet-400/30 rounded-full px-2 py-0.5">Powered by MemWal</span>
+            </div>
+            <p className="text-sm text-white/60 mb-4">
+              Search agent memory using natural language. MemWal uses semantic search over encrypted 
+              memories stored on Walrus — not just keyword matching.
+            </p>
+            <div className="flex gap-3 mb-4">
+              <input
+                id="recall-input"
+                defaultValue="AI generated images"
+                placeholder="e.g. AI generated images from BBC"
+                className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50"
+              />
+              <Button
+                onClick={async () => {
+                  const q = (document.getElementById("recall-input") as HTMLInputElement).value;
+                  const res = await fetch(`${API_URL}/agent/recall?q=${encodeURIComponent(q)}&limit=5`);
+                  const data = await res.json();
+                  setRecallResults(data.results ?? []);
+                }}
+                className="bg-violet-600 hover:bg-violet-500 text-white shrink-0">
+                Recall
+              </Button>
+            </div>
+            {recallResults.length > 0 && (
+              <div className="space-y-2">
+                {recallResults.map((r, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                    className="rounded-lg border border-white/10 bg-black/50 p-3">
+                    <p className="text-xs text-white/70 leading-relaxed">{r.text}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-[10px] text-violet-400 font-mono">blob: {r.blob_id?.slice(0,16)}...</span>
+                      <span className="text-[10px] text-white/30">similarity: {(1 - r.distance).toFixed(2)}</span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            {recallResults.length === 0 && (
+              <p className="text-xs text-white/30">
+                No memories recalled yet — run a few verifications first, then search.
+              </p>
+            )}
+          </div>
+        </motion.div>
 
         {/* Try It — Verify Any Image URL */}
         <motion.div className="mb-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
