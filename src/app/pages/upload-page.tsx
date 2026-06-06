@@ -78,6 +78,7 @@ async function estimateAIScore(file: File): Promise<{ score: number; signals: st
   }
 }
 
+function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
