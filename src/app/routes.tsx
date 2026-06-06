@@ -11,6 +11,8 @@ import { ExplorerPage } from "./pages/explorer-page";
 import { ZkLoginCallbackPage } from "./pages/zklogin-callback-page";
 import { OrgPage } from "./pages/org-page";
 
+import { AgentPage } from "./pages/agent-page";
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -26,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "api",              Component: ApiPage },
       { path: "explorer",         Component: ExplorerPage },
       { path: "org",              Component: OrgPage },
+      { path: "agent",            Component: AgentPage },
       { path: "zklogin/callback", Component: ZkLoginCallbackPage },
     ],
   },

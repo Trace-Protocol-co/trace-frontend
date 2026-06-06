@@ -126,9 +126,22 @@ export function UploadPage() {
       setPhash(computePHash(hash));
 
       // AI score estimation from file entropy
-      const { score, signals } = await estimateAIScore(f);
-      setAiScore(score);
-      setAiSignals(signals);
+      // AI detection — call backend which uses Sightengine if configured
+      try {
+        const aiForm = new FormData();
+        aiForm.append("file", f);
+        const aiRes  = await fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/detect-ai`, {
+          method: "POST", body: aiForm,
+        });
+        const aiData = await aiRes.json();
+        setAiScore(aiData.score ?? 0);
+        setAiSignals(aiData.signals ?? []);
+      } catch {
+        // Fall back to client-side detection if backend unavailable
+        const { score, signals } = await estimateAIScore(f);
+        setAiScore(score);
+        setAiSignals(signals);
+      }
 
       setPhase("idle");
     } catch {

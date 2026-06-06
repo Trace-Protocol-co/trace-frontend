@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { to: "/verify",    label: "Verify" },
   { to: "/upload",    label: "Upload" },
   { to: "/explorer",  label: "Explorer" },
+  { to: "/agent",     label: "Agent" },
   { to: "/org",       label: "Orgs" },
   { to: "/extension", label: "Extension" },
   { to: "/api",       label: "API" },
