@@ -70,15 +70,15 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contract */}
+          {/* On-Chain */}
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">On-Chain</h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="https://suiexplorer.com/object/0x3eff0f24ece1bd96bef48ba534eb498331a87cb1fb90d30de5bf1ec940cc648e?network=testnet"
+                <a href="https://suiexplorer.com/object/0xf1acdf7d36c4816d91ebe39f0887f163155a08bb0d435e7ea8f737b981637bdb?network=testnet"
                   target="_blank" rel="noopener noreferrer"
                   className="text-white/70 hover:text-emerald-400 transition-colors font-mono text-xs">
-                  Package: 0x3eff...648e
+                  Package: 0xf1ac...bdb
                 </a>
               </li>
               <li>
@@ -103,11 +103,13 @@ export function Footer() {
             <span className="text-xl font-semibold text-white">TRACE</span>
           </Link>
           <div className="text-sm text-white/40 text-center">
-            © 2026 TRACE Protocol · Built on Sui + Walrus ·
+            © 2026 TRACE Protocol · Built on Sui + Walrus · Sui Hackathon 2025
           </div>
           <div className="flex gap-4 text-sm">
             <a href={GITHUB} target="_blank" rel="noopener noreferrer"
               className="text-white/40 hover:text-white transition-colors">GitHub</a>
+            <a href="https://trace-cbvb.onrender.com/v1/health" target="_blank" rel="noopener noreferrer"
+              className="text-white/40 hover:text-white transition-colors">Status</a>
           </div>
         </div>
 

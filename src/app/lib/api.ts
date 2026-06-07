@@ -6,12 +6,25 @@ const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
 export type Verdict = "VERIFIED_ORIGINAL" | "MODIFIED" | "UNVERIFIED" | "AI_GENERATED" | "UNKNOWN";
 
+export interface BankInfo {
+  sighting_id?:        string;
+  contributed_to_bank: boolean;
+  bank_blob_id?:       string | null;
+  known?:              boolean;
+  sighting_count?:     number;
+  first_seen?:         string;
+  sources?:            string[];
+  message?:            string;
+}
+
 export interface VerifyResult {
   verdict: Verdict;
   confidence: number;
   origin: { first_seen: string; creator: string; sui_tx: string; walrus_blob: string } | null;
   provenance_chain: ChainNode[];
   similarity_matches: { blob_id: string; similarity: number; relationship: string }[];
+  bank?: BankInfo;
+  ai_score?: number;
   flags: string[];
 }
 

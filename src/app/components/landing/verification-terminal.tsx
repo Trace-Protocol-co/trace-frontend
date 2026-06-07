@@ -392,6 +392,48 @@ export function VerificationTerminal() {
                     </div>
                   )}
 
+                  {/* Collective Memory Bank */}
+                  {result.bank && (
+                    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-5 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-xs font-semibold text-blue-400 tracking-wider">COLLECTIVE MEMORY BANK</div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="size-1.5 rounded-full bg-blue-400 animate-pulse" />
+                          <span className="text-xs text-blue-400/70">MemWal on Walrus</span>
+                        </div>
+                      </div>
+                      {result.bank.known && result.bank.sighting_count ? (
+                        <div className="grid grid-cols-3 gap-3 mb-3">
+                          <div className="rounded-lg bg-black/40 p-3 text-center">
+                            <div className="text-2xl font-bold text-white">{result.bank.sighting_count}</div>
+                            <div className="text-xs text-white/40 mt-0.5">Total Sightings</div>
+                          </div>
+                          <div className="rounded-lg bg-black/40 p-3 text-center">
+                            <div className="text-xs font-medium text-white mt-1 truncate">{result.bank.first_seen ? new Date(result.bank.first_seen).toLocaleDateString() : "—"}</div>
+                            <div className="text-xs text-white/40 mt-0.5">First Seen</div>
+                          </div>
+                          <div className="rounded-lg bg-black/40 p-3 text-center">
+                            <div className="text-xs font-medium text-white mt-1">{result.bank.sources?.length ?? 0}</div>
+                            <div className="text-xs text-white/40 mt-0.5">Sources</div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-xs text-white/50 mb-2">First encounter — no prior sightings in bank</div>
+                      )}
+                      <div className="flex items-center gap-2 text-xs">
+                        <div className={`size-1.5 rounded-full ${result.bank.contributed_to_bank ? "bg-emerald-400" : "bg-white/20"}`} />
+                        <span className="text-white/50">{result.bank.message ?? "Sighting recorded"}</span>
+                        {result.bank.bank_blob_id && (
+                          <a href={`https://aggregator.walrus-testnet.walrus.space/v1/${result.bank.bank_blob_id}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="ml-auto text-blue-400/70 hover:text-blue-400">
+                            <ExternalLink className="size-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Actions */}
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button onClick={reset} variant="outline"

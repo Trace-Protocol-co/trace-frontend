@@ -110,11 +110,16 @@ export function UploadPage() {
   const [mediaType, setMediaType] = useState("image");
   const [result, setResult] = useState<RegisterResult | null>(null);
   const [error, setError] = useState("");
+  // Bank pre-check state (F-9, View 2)
+  const [bankPreCheck, setBankPreCheck] = useState<{
+    known: boolean; sighting_count: number; first_seen?: string; sources?: string[];
+  } | null>(null);
 
   const handleFile = useCallback(async (f: File) => {
     setFile(f);
     setResult(null);
     setError("");
+    setBankPreCheck(null);
     // Auto-detect media type
     const detectedType = f.type.startsWith("video") ? "video"
                        : f.type.startsWith("audio") ? "audio"
@@ -125,6 +130,22 @@ export function UploadPage() {
       const hash = await computeSHA256(f);
       setSha256(hash);
       setPhash(computePHash(hash));
+
+      // Bank pre-check — query before registration
+      try {
+        const bankRes = await fetch(
+          `${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/agent/spread/${hash}`
+        );
+        const bankData = await bankRes.json();
+        if (bankData.known_to_bank) {
+          setBankPreCheck({
+            known: true,
+            sighting_count: bankData.sighting_count,
+            first_seen: bankData.first_seen,
+            sources: bankData.sources,
+          });
+        }
+      } catch { /* bank pre-check is non-critical */ }
 
       // AI score estimation from file entropy
       // AI detection — call backend which uses Sightengine if configured
@@ -328,6 +349,42 @@ export function UploadPage() {
                       <CopyBtn text={phash} />
                     </div>
                   </div>
+                </motion.div>
+              )}
+
+              {/* Bank Pre-Check (F-9, View 2) */}
+              {bankPreCheck && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  className={`rounded-xl border p-4 ${
+                    bankPreCheck.known
+                      ? "border-amber-500/30 bg-amber-500/5"
+                      : "border-emerald-500/30 bg-emerald-500/5"
+                  }`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={`size-2 rounded-full ${bankPreCheck.known ? "bg-amber-400" : "bg-emerald-400"}`} />
+                    <span className={`text-xs font-semibold ${bankPreCheck.known ? "text-amber-400" : "text-emerald-400"}`}>
+                      COLLECTIVE MEMORY BANK PRE-CHECK
+                    </span>
+                  </div>
+                  {bankPreCheck.known ? (
+                    <div>
+                      <p className="text-xs text-white/70 mb-2">
+                        ⚠ This media has been seen <strong className="text-white">{bankPreCheck.sighting_count}</strong> times
+                        before this registration attempt.
+                        {bankPreCheck.first_seen && ` First encountered ${new Date(bankPreCheck.first_seen).toLocaleDateString()}.`}
+                      </p>
+                      {bankPreCheck.sources && bankPreCheck.sources.length > 0 && (
+                        <p className="text-xs text-white/40">Sources: {bankPreCheck.sources.join(", ")}</p>
+                      )}
+                      <p className="text-xs text-amber-400/70 mt-2">
+                        Large registration lag may indicate backdating. Temporal staking required if &gt;72 hours old.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-white/70">
+                      ✓ No prior sightings found. This appears to be a first encounter — corroborates your first-creation claim.
+                    </p>
+                  )}
                 </motion.div>
               )}
 
