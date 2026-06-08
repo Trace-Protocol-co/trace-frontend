@@ -7,7 +7,7 @@ import { ExtensionWorkflow } from "../components/extension/ExtensionWorkflow";
 import { ExtensionFeatures } from "../components/extension/ExtensionFeatures";
 import { ExtensionDownload } from "../components/extension/ExtensionDownload";
 
-const EXTENSION_ZIP = "https://github.com/anjolaoladele/trace-protocol/raw/main/trace-extension.zip";
+const EXTENSION_ZIP = "https://github.com/Trace-Protocol-co/trace-extension";
 
 export function ExtensionPage() {
   const navigate = useNavigate();
