@@ -97,6 +97,12 @@ export async function registerMedia(params: {
   if (params.creatorEmail)   fd.append("creator_email", params.creatorEmail);
   const res = await fetch(`${API}/v1/register`, { method: "POST", body: fd });
   const data = await res.json();
+  if (res.status === 409) {
+    // Duplicate registration — throw with full data so UI can show existing record
+    const err = new Error("already_registered") as Error & { data: typeof data };
+    err.data = data;
+    throw err;
+  }
   if (!res.ok) throw new Error(data.error ?? `Registration failed (${res.status})`);
   return data;
 }

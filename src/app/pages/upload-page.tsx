@@ -110,6 +110,10 @@ export function UploadPage() {
   const [mediaType, setMediaType] = useState("image");
   const [result, setResult] = useState<RegisterResult | null>(null);
   const [error, setError] = useState("");
+  const [duplicate, setDuplicate] = useState<{
+    media_id: string; creator: string; registered: string;
+    sui_tx: string; walrus_blob: string; certificate_url: string;
+  } | null>(null);
   // Bank pre-check state (F-9, View 2)
   const [bankPreCheck, setBankPreCheck] = useState<{
     known: boolean; sighting_count: number; first_seen?: string; sources?: string[];
@@ -119,6 +123,7 @@ export function UploadPage() {
     setFile(f);
     setResult(null);
     setError("");
+    setDuplicate(null);
     setBankPreCheck(null);
     // Auto-detect media type
     const detectedType = f.type.startsWith("video") ? "video"
@@ -214,6 +219,15 @@ export function UploadPage() {
       setPhase("complete");
     } catch (err: unknown) {
       clearInterval(interval);
+      // Handle duplicate registration (409)
+      if (err instanceof Error && err.message === "already_registered") {
+        const dupErr = err as Error & { data?: Record<string, unknown> };
+        if (dupErr.data) {
+          setDuplicate(dupErr.data as typeof duplicate);
+          setPhase("complete");
+          return;
+        }
+      }
       setError(err instanceof Error ? err.message : "Registration failed — is the backend running?");
       setPhase("error");
     }
@@ -548,6 +562,54 @@ export function UploadPage() {
                 </div>
               </div>
             </div>
+          )}
+
+
+          {/* DUPLICATE — already registered */}
+          {phase === "complete" && duplicate && (
+            <motion.div className="p-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="mb-6 flex flex-col items-center gap-4 text-center">
+                <div className="flex size-16 items-center justify-center rounded-full bg-amber-500/20">
+                  <span className="text-3xl">⚠</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Already Registered</h3>
+                  <p className="mt-1 text-sm text-white/50">This image is already on TRACE. View the existing record below.</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/40">Registered</span>
+                  <span className="text-sm text-white">{duplicate?.registered ? new Date(duplicate.registered as string).toLocaleString() : "—"}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/40">Creator</span>
+                  <span className="font-mono text-xs text-emerald-400 truncate max-w-xs">{String(duplicate?.creator ?? "").slice(0,20)}...</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-white/40">Sui TX</span>
+                  <a href={`https://suiexplorer.com/txblock/${duplicate?.sui_tx}?network=testnet`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="font-mono text-xs text-blue-400 hover:text-blue-300 truncate max-w-xs">
+                    {String(duplicate?.sui_tx ?? "").slice(0,20)}...
+                  </a>
+                </div>
+                <div className="pt-2 flex gap-3">
+                  <a href={`/graph/${duplicate?.media_id}`}
+                    className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold py-3 text-center transition-colors">
+                    View Provenance Graph
+                  </a>
+                  <a href={duplicate?.certificate_url as string} target="_blank" rel="noopener noreferrer"
+                    className="flex-1 rounded-xl border border-white/20 hover:bg-white/10 text-white text-sm font-semibold py-3 text-center transition-colors">
+                    View Certificate
+                  </a>
+                </div>
+                <button onClick={() => { setDuplicate(null); setPhase("idle"); setFile(null); }}
+                  className="w-full text-xs text-white/30 hover:text-white/60 py-2 transition-colors">
+                  Register a different image
+                </button>
+              </div>
+            </motion.div>
           )}
 
           {/* COMPLETE */}
