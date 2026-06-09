@@ -131,18 +131,18 @@ export function UploadPage() {
       setSha256(hash);
       setPhash(computePHash(hash));
 
-      // Bank pre-check — query before registration
+      // Bank pre-check — query PostgreSQL sightings before registration
       try {
         const bankRes = await fetch(
-          `${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/agent/spread/${hash}`
+          `${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/bank/sightings/${hash}`
         );
         const bankData = await bankRes.json();
-        if (bankData.known_to_bank) {
+        if (bankData.count > 0) {
           setBankPreCheck({
             known: true,
-            sighting_count: bankData.sighting_count,
-            first_seen: bankData.first_seen,
-            sources: bankData.sources,
+            sighting_count: bankData.count,
+            first_seen: bankData.sightings?.[bankData.sightings.length - 1]?.seen_at,
+            sources: [...new Set((bankData.sightings ?? []).map((s: {platform: string}) => s.platform))],
           });
         }
       } catch { /* bank pre-check is non-critical */ }
@@ -441,10 +441,7 @@ export function UploadPage() {
                         ))}
                       </div>
                     )}
-                    <input type="range" min="0" max="10000" step="100" value={aiScore}
-                      onChange={(e) => setAiScore(Number(e.target.value))}
-                      className="w-full accent-emerald-500" />
-                    <p className="mt-1 text-xs text-white/30">Auto-detected from file metadata. Adjust if needed.</p>
+                    <p className="mt-1 text-xs text-white/30">Powered by Sightengine · score locked at detection time</p>
                   </div>
 
                   {/* Description */}
