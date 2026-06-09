@@ -241,6 +241,15 @@ export function UploadPage() {
     setResult(null);
     setError("");
     setProgress(0);
+    setDescription("");
+    setParentId("");
+    setEditType("0");
+    setAiScore(0);
+    setAiSignals([]);
+    setBankPreCheck(null);
+    setDuplicate(null);
+    setGps(null);
+    setMediaType("image");
   };
 
   return (
@@ -604,7 +613,7 @@ export function UploadPage() {
                     View Certificate
                   </a>
                 </div>
-                <button onClick={() => { setDuplicate(null); setPhase("idle"); setFile(null); }}
+                <button onClick={reset}
                   className="w-full text-xs text-white/30 hover:text-white/60 py-2 transition-colors">
                   Register a different image
                 </button>
