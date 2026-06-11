@@ -1,9 +1,9 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Database, AlertTriangle, TrendingUp, Shield, RefreshCw, ExternalLink, Search } from "lucide-react";
+import { Database, AlertTriangle, TrendingUp, Shield, RefreshCw, ExternalLink, Search, Eye } from "lucide-react";
 import { Button } from "../components/ui/button";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+const API    = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 const WALRUS = "https://aggregator.walrus-testnet.walrus.space/v1";
 
 interface BankStats {
@@ -15,8 +15,11 @@ interface BankStats {
   active_alerts:      number;
   sessions_run:       number;
   walrus_memory:      string | null;
+  walrus_explorer:    string | null;
   memwal_enabled:     boolean;
   last_updated:       string | null;
+  memwal_blobs:       number;
+  first_sighting:     string | null;
 }
 
 interface TopSighted {
@@ -34,11 +37,12 @@ interface Alert {
 }
 
 interface ResearchReport {
-  dataset:              { total_bank_sightings: number; total_registered_media: number; total_sessions: number; active_anomaly_alerts: number };
+  dataset:              { total_bank_sightings: number; total_registered_media: number; total_sessions: number; active_anomaly_alerts: number; memwal_blobs_on_walrus?: number };
   verdict_distribution: Record<string, number>;
   integrity_rate:       string;
   ai_generation_rate:   string;
   walrus_memory_blob:   string | null;
+  walrus_explorer:      string | null;
 }
 
 const VERDICT_COLOR: Record<string, string> = {
@@ -49,14 +53,22 @@ const VERDICT_COLOR: Record<string, string> = {
   UNKNOWN:           "text-zinc-400",
 };
 
+const VERDICT_LABEL: Record<string, string> = {
+  VERIFIED_ORIGINAL: "Verified Original",
+  MODIFIED:          "Modified",
+  UNVERIFIED:        "Unverified",
+  AI_GENERATED:      "AI Generated",
+  UNKNOWN:           "Unknown",
+};
+
 export function BankPage() {
-  const [stats,    setStats]    = useState<BankStats | null>(null);
-  const [top,      setTop]      = useState<TopSighted[]>([]);
-  const [alerts,   setAlerts]   = useState<Alert[]>([]);
-  const [research, setResearch] = useState<ResearchReport | null>(null);
-  const [recall,   setRecall]   = useState<{ text: string; blob_id: string; distance: number }[]>([]);
-  const [query,    setQuery]    = useState("AI generated images");
-  const [loading,  setLoading]  = useState(true);
+  const [stats,     setStats]     = useState<BankStats | null>(null);
+  const [top,       setTop]       = useState<TopSighted[]>([]);
+  const [alerts,    setAlerts]    = useState<Alert[]>([]);
+  const [research,  setResearch]  = useState<ResearchReport | null>(null);
+  const [recall,    setRecall]    = useState<{ text: string; blob_id: string; distance: number }[]>([]);
+  const [query,     setQuery]     = useState("verified images on BBC");
+  const [loading,   setLoading]   = useState(true);
   const [recalling, setRecalling] = useState(false);
 
   const fetchAll = async () => {
@@ -88,6 +100,8 @@ export function BankPage() {
 
   useEffect(() => { fetchAll(); }, []);
 
+  const unverified = stats ? stats.total_sightings - stats.total_verified : 0;
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24">
@@ -100,41 +114,91 @@ export function BankPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-3">Memory Bank</h1>
           <p className="text-white/60 max-w-2xl">
-            A persistent, decentralized record of every piece of media encountered by every TRACE agent.
-            Stored in MemWal on Walrus. Never forgets. Grows with every verification.
+            A persistent, decentralized record of every image encountered by every TRACE agent.
+            Stored in MemWal on Walrus. Never forgets. Grows with every page browse.
           </p>
         </motion.div>
 
         {/* Stats grid */}
-        <motion.div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8"
+        <motion.div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           {[
-            { label: "Total Sightings",   value: stats?.total_sightings ?? 0,    color: "text-white",        icon: Database },
-            { label: "Verified",           value: stats?.total_verified ?? 0,     color: "text-emerald-400",  icon: Shield },
-            { label: "Active Alerts",      value: stats?.active_alerts ?? 0,      color: "text-rose-400",     icon: AlertTriangle },
-            { label: "Unique Media",       value: stats?.unique_media ?? 0,       color: "text-blue-400",     icon: TrendingUp },
+            {
+              label: "Images Encountered",
+              sub:   "Across all sites · growing",
+              value: stats?.total_sightings ?? 0,
+              color: "text-white",
+              icon:  Eye,
+            },
+            {
+              label: "Cryptographically Proven",
+              sub:   "On Sui blockchain · tamper-proof",
+              value: stats?.total_verified ?? 0,
+              color: "text-emerald-400",
+              icon:  Shield,
+            },
+            {
+              label: "Suspicious Patterns",
+              sub:   "Coordinated fakes detected",
+              value: stats?.active_alerts ?? 0,
+              color: "text-rose-400",
+              icon:  AlertTriangle,
+            },
+            {
+              label: "Registered on TRACE",
+              sub:   "With Walrus blob + certificate",
+              value: stats?.unique_media ?? 0,
+              color: "text-blue-400",
+              icon:  TrendingUp,
+            },
           ].map((s) => (
             <div key={s.label} className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-white/40">{s.label}</span>
-                <s.icon className={`size-4 ${s.color} opacity-60`} />
+                <span className="text-xs text-white/40 uppercase tracking-wider leading-tight">{s.label}</span>
+                <s.icon className={`size-4 ${s.color} opacity-60 shrink-0 ml-2`} />
               </div>
-              <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
+              <div className={`text-3xl font-bold ${s.color}`}>{s.value.toLocaleString()}</div>
+              <div className="text-xs text-white/30 mt-1">{s.sub}</div>
             </div>
           ))}
         </motion.div>
 
+        {/* The gap story */}
+        {stats && stats.total_sightings > 0 && (
+          <motion.div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+            <p className="text-white/60 text-sm">
+              <span className="text-white font-bold">{stats.total_sightings.toLocaleString()}</span> images encountered · {" "}
+              <span className="text-emerald-400 font-bold">{stats.total_verified.toLocaleString()}</span> cryptographically proven · {" "}
+              <span className="text-rose-400 font-bold">{unverified.toLocaleString()}</span> unverified
+              <span className="text-white/40"> — this is why TRACE exists</span>
+            </p>
+            {stats.first_sighting && (
+              <p className="text-white/30 text-xs mt-1">
+                First sighting: {new Date(stats.first_sighting).toLocaleDateString()} · 
+                Last updated: {stats.last_updated ? new Date(stats.last_updated).toLocaleTimeString() : "—"}
+              </p>
+            )}
+          </motion.div>
+        )}
+
         {/* Walrus memory link */}
-        {stats?.walrus_memory && (
+        {(stats?.walrus_explorer || stats?.walrus_memory) && (
           <motion.div className="mb-8 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-blue-400 font-semibold mb-1">WALRUS PERSISTENT MEMORY</div>
-                <div className="font-mono text-xs text-white/60 truncate max-w-lg">{stats.walrus_memory}</div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="size-2 rounded-full bg-blue-400 animate-pulse" />
+                  <div className="text-xs text-blue-400 font-semibold">WALRUS PERSISTENT MEMORY · {stats?.memwal_blobs ?? 0} blobs stored</div>
+                </div>
+                <div className="font-mono text-xs text-white/60 truncate max-w-lg">
+                  {stats?.walrus_explorer ?? stats?.walrus_memory}
+                </div>
               </div>
-              <a href={stats.walrus_memory} target="_blank" rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300">
+              <a href={stats?.walrus_explorer ?? stats?.walrus_memory ?? "#"}
+                target="_blank" rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 shrink-0 ml-4">
                 <ExternalLink className="size-4" />
               </a>
             </div>
@@ -156,7 +220,10 @@ export function BankPage() {
               )}
             </div>
             {alerts.length === 0 ? (
-              <div className="text-sm text-white/40 py-8 text-center">No coordinated inauthentic behavior detected</div>
+              <div className="text-sm text-white/40 py-8 text-center">
+                <AlertTriangle className="size-8 mx-auto mb-3 opacity-20" />
+                No coordinated inauthentic behavior detected
+              </div>
             ) : (
               <div className="space-y-3">
                 {alerts.map((a, i) => (
@@ -165,7 +232,7 @@ export function BankPage() {
                       <div className="size-2 rounded-full bg-rose-400 animate-pulse" />
                       <span className="text-xs font-semibold text-rose-400">COORDINATED SPREAD DETECTED</span>
                     </div>
-                    <div className="font-mono text-xs text-white/50 mb-2">{a.hash}</div>
+                    <div className="font-mono text-xs text-white/50 mb-2 truncate">{a.hash}</div>
                     <div className="text-xs text-white/40">
                       Seen {a.count}× across {a.sources.length} sources: {a.sources.join(", ")}
                     </div>
@@ -180,24 +247,27 @@ export function BankPage() {
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
             <div className="flex items-center gap-3 mb-5">
               <TrendingUp className="size-5 text-blue-400" />
-              <h2 className="font-semibold">Top Sighted Media</h2>
+              <h2 className="font-semibold">Most Encountered Media</h2>
             </div>
             {top.length === 0 ? (
-              <div className="text-sm text-white/40 py-8 text-center">No sightings yet — verify media to populate the bank</div>
+              <div className="text-sm text-white/40 py-8 text-center">
+                <Database className="size-8 mx-auto mb-3 opacity-20" />
+                Browse any page with the extension to populate
+              </div>
             ) : (
               <div className="space-y-2">
                 {top.slice(0, 8).map((item, i) => (
                   <div key={i} className="flex items-center gap-3 rounded-lg border border-white/5 bg-black/30 px-3 py-2">
-                    <span className="text-xs text-white/30 w-4">{i + 1}</span>
+                    <span className="text-xs text-white/30 w-4 shrink-0">{i + 1}</span>
                     <div className="flex-1 min-w-0">
                       <div className="font-mono text-xs text-white/60 truncate">{item.hash}</div>
-                      <div className="text-xs text-white/30">{item.sources?.join(", ")}</div>
+                      <div className="text-xs text-white/30 truncate">{item.sources?.slice(0,3).join(", ")}</div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0">
                       <div className={`text-xs font-semibold ${VERDICT_COLOR[item.verdict] ?? "text-zinc-400"}`}>
-                        {item.verdict?.replace("_", " ")}
+                        {VERDICT_LABEL[item.verdict] ?? item.verdict}
                       </div>
-                      <div className="text-xs text-white/30">{item.sighting_count}×</div>
+                      <div className="text-xs text-white/30">{item.sighting_count.toLocaleString()}×</div>
                     </div>
                   </div>
                 ))}
@@ -215,11 +285,11 @@ export function BankPage() {
             <span className="text-xs border border-violet-400/30 text-violet-400 rounded-full px-2 py-0.5">MemWal</span>
           </div>
           <p className="text-sm text-white/50 mb-4">
-            Search the bank using natural language. MemWal uses semantic embeddings — not keyword matching.
+            Search the bank by meaning — not keywords. Ask anything about what the bank has seen.
           </p>
           <div className="flex gap-3 mb-4">
             <input value={query} onChange={e => setQuery(e.target.value)}
-              placeholder="e.g. AI generated images from BBC"
+              placeholder="e.g. verified images from BBC"
               className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50" />
             <Button onClick={doRecall} disabled={recalling}
               className="bg-violet-600 hover:bg-violet-500 text-white shrink-0">
@@ -233,10 +303,11 @@ export function BankPage() {
                   <p className="text-xs text-white/70 leading-relaxed mb-2">{r.text}</p>
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-[10px] text-violet-400">blob: {r.blob_id?.slice(0, 20)}...</span>
-                    <span className="text-[10px] text-white/30">similarity: {(1 - r.distance).toFixed(2)}</span>
-                    <a href={`${WALRUS}/${r.blob_id}`} target="_blank" rel="noopener noreferrer"
-                      className="ml-auto text-violet-400/50 hover:text-violet-400">
-                      <ExternalLink className="size-3" />
+                    <span className="text-[10px] text-white/30">relevance: {(1 - r.distance).toFixed(2)}</span>
+                    <a href={`https://walruscan.com/testnet/blob/${r.blob_id}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="ml-auto text-violet-400/50 hover:text-violet-400 text-[10px]">
+                      Walruscan ↗
                     </a>
                   </div>
                 </div>
@@ -246,7 +317,7 @@ export function BankPage() {
             <p className="text-xs text-white/30">
               {stats?.memwal_enabled
                 ? "Enter a query and click Recall to search semantic memory"
-                : "MemWal not configured — add MEMWAL_PRIVATE_KEY and MEMWAL_ACCOUNT_ID to enable"}
+                : "MemWal not configured — add MEMWAL_PRIVATE_KEY to enable"}
             </p>
           )}
         </motion.div>
@@ -256,7 +327,10 @@ export function BankPage() {
           <motion.div className="rounded-2xl border border-white/10 bg-white/5 p-6"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-semibold">Research Agent Report</h2>
+              <div>
+                <h2 className="font-semibold">Research Agent Report</h2>
+                <p className="text-xs text-white/40 mt-0.5">Aggregate intelligence from the Collective Memory Bank</p>
+              </div>
               <Button variant="outline" size="sm"
                 className="border-white/20 text-white hover:bg-white/10"
                 onClick={fetchAll}>
@@ -267,45 +341,54 @@ export function BankPage() {
               <div className="rounded-xl bg-black/40 p-4 text-center">
                 <div className="text-2xl font-bold text-white">{research.integrity_rate}</div>
                 <div className="text-xs text-white/40 mt-1">Integrity Rate</div>
+                <div className="text-xs text-white/20 mt-0.5">Verified / total sightings</div>
               </div>
               <div className="rounded-xl bg-black/40 p-4 text-center">
                 <div className="text-2xl font-bold text-violet-400">{research.ai_generation_rate}</div>
                 <div className="text-xs text-white/40 mt-1">AI Generation Rate</div>
+                <div className="text-xs text-white/20 mt-0.5">Flagged as synthetic</div>
               </div>
               <div className="rounded-xl bg-black/40 p-4 text-center">
-                <div className="text-2xl font-bold text-blue-400">{research.dataset.total_sessions}</div>
-                <div className="text-xs text-white/40 mt-1">Agent Sessions</div>
+                <div className="text-2xl font-bold text-blue-400">{research.dataset.memwal_blobs_on_walrus ?? 0}</div>
+                <div className="text-xs text-white/40 mt-1">Walrus Blobs</div>
+                <div className="text-xs text-white/20 mt-0.5">Permanently stored</div>
               </div>
             </div>
             {Object.keys(research.verdict_distribution).length > 0 && (
               <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-                <div className="text-xs text-white/40 mb-3">Verdict Distribution</div>
+                <div className="text-xs text-white/40 mb-3 uppercase tracking-wider">Verdict Distribution</div>
                 <div className="space-y-2">
-                  {Object.entries(research.verdict_distribution).map(([verdict, count]) => {
-                    const total = Object.values(research.verdict_distribution).reduce((a, b) => a + b, 0);
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={verdict} className="flex items-center gap-3">
-                        <span className={`text-xs w-36 ${VERDICT_COLOR[verdict] ?? "text-zinc-400"}`}>
-                          {verdict.replace("_", " ")}
-                        </span>
-                        <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                          <div className="h-full rounded-full bg-white/30" style={{ width: `${pct}%` }} />
+                  {Object.entries(research.verdict_distribution)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([verdict, count]) => {
+                      const total = Object.values(research.verdict_distribution).reduce((a, b) => a + b, 0);
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={verdict} className="flex items-center gap-3">
+                          <span className={`text-xs w-40 shrink-0 ${VERDICT_COLOR[verdict] ?? "text-zinc-400"}`}>
+                            {VERDICT_LABEL[verdict] ?? verdict}
+                          </span>
+                          <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                            <div className="h-full rounded-full bg-white/30 transition-all duration-500" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs text-white/40 w-12 text-right">{count.toLocaleString()}</span>
                         </div>
-                        <span className="text-xs text-white/40 w-8 text-right">{count}</span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
               </div>
             )}
-            <div className="mt-4 text-xs text-white/30">
-              {research.walrus_memory_blob && (
-                <span>Archived on Walrus: <a href={`${WALRUS}/${research.walrus_memory_blob}`}
+            {(research.walrus_explorer || research.walrus_memory_blob) && (
+              <div className="mt-4 flex items-center gap-2">
+                <div className="size-1.5 rounded-full bg-blue-400" />
+                <span className="text-xs text-white/30">Archived on Walrus: </span>
+                <a href={research.walrus_explorer ?? `${WALRUS}/${research.walrus_memory_blob}`}
                   target="_blank" rel="noopener noreferrer"
-                  className="text-blue-400/70 hover:text-blue-400">{research.walrus_memory_blob.slice(0, 20)}...</a></span>
-              )}
-            </div>
+                  className="text-xs text-blue-400/70 hover:text-blue-400 font-mono truncate">
+                  {(research.walrus_memory_blob ?? "").slice(0, 24)}...
+                </a>
+              </div>
+            )}
           </motion.div>
         )}
 
