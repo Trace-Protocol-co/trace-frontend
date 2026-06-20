@@ -96,12 +96,13 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500">
-              <span className="text-lg font-bold text-black">T</span>
-            </div>
-            <span className="text-xl font-semibold text-white">TRACE</span>
-          </Link>
+          <Link to="/" className="flex items-center shrink-0">
+  <img
+    src="/logo.jpg"
+    alt="TRACE Protocol"
+    className="h-9 w-auto object-contain"
+  />
+</Link>
           <div className="text-sm text-white/40 text-center">
             © 2026 TRACE Protocol · Built on Sui + Walrus · 
           </div>

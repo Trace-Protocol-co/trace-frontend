@@ -37,12 +37,13 @@ export function Root() {
           <div className="flex items-center justify-between">
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 shrink-0">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-cyan-500">
-                <span className="text-lg font-bold text-black">T</span>
-              </div>
-              <span className="text-xl font-semibold tracking-tight">TRACE</span>
-            </Link>
+            <Link to="/" className="flex items-center shrink-0">
+  <img
+    src="/logo.jpg"
+    alt="TRACE Protocol"
+    className="h-9 w-auto object-contain"
+  />
+</Link>
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
