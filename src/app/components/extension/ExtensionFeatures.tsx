@@ -84,7 +84,7 @@ const features = [
   {
     icon: Sparkles,
     title: "One-Click Verify",
-    description: "Right-click any image or video to check authenticity without leaving the page",
+    description: "Right-click any media file to check authenticity without leaving the page",
     color: "modified",
   },
 ];

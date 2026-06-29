@@ -28,7 +28,7 @@ export function ExtensionPage() {
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
             Verify media authenticity across the web in real-time. See trust badges on every
-            image and video — powered by Sui blockchain.
+            any media file — powered by Sui blockchain.
           </p>
 
           {/* Install instructions */}
@@ -70,7 +70,7 @@ export function ExtensionPage() {
           <motion.div className="text-center mb-8"
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">What You'll See on Every Page</h2>
-            <p className="text-muted-foreground text-sm">Color-coded badges appear automatically on all images and videos</p>
+            <p className="text-muted-foreground text-sm">Color-coded badges appear automatically on all media</p>
           </motion.div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
@@ -110,7 +110,7 @@ export function ExtensionPage() {
               initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}>
               {[
-                { icon: Eye,    title: "Recent Scans",   desc: "See the last 10 images verified on any page you visited" },
+                { icon: Eye,    title: "Recent Scans",   desc: "See the last 10 media files verified on any page you visited" },
                 { icon: Zap,    title: "Live Stats",     desc: "Today's count of verified, modified, AI-generated media" },
                 { icon: Shield, title: "Quick Verify",   desc: "Paste any URL for instant verification without leaving the page" },
                 { icon: Lock,   title: "Zero Tracking",  desc: "All verification goes directly to blockchain. We never see your browsing." },

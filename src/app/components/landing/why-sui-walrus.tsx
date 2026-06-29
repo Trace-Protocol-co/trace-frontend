@@ -111,7 +111,7 @@ export function WhySuiWalrus() {
           {[
             { value: "~400ms", label: "Finality Time" },
             { value: "$0.001", label: "Per Registration" },
-            { value: "19/19",  label: "Tests Passing" },
+            { value: "29/29",  label: "Tests Passing" },
             { value: "3",      label: "Move Modules" },
           ].map((stat) => (
             <div key={stat.label} className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-6 text-center">

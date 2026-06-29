@@ -583,7 +583,7 @@ export function UploadPage() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">Already Registered</h3>
-                  <p className="mt-1 text-sm text-white/50">This image is already on TRACE. View the existing record below.</p>
+                  <p className="mt-1 text-sm text-white/50">This media is already on TRACE. View the existing record below.</p>
                 </div>
               </div>
               <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 space-y-4">
@@ -615,7 +615,7 @@ export function UploadPage() {
                 </div>
                 <button onClick={reset}
                   className="w-full text-xs text-white/30 hover:text-white/60 py-2 transition-colors">
-                  Register a different image
+                  Register a different media file
                 </button>
               </div>
             </motion.div>

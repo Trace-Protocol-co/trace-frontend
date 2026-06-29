@@ -67,7 +67,7 @@ export function BankPage() {
   const [alerts,    setAlerts]    = useState<Alert[]>([]);
   const [research,  setResearch]  = useState<ResearchReport | null>(null);
   const [recall,    setRecall]    = useState<{ text: string; blob_id: string; distance: number }[]>([]);
-  const [query,     setQuery]     = useState("verified images on BBC");
+  const [query,     setQuery]     = useState("verified media on BBC");
   const [loading,   setLoading]   = useState(true);
   const [recalling, setRecalling] = useState(false);
 
@@ -114,7 +114,7 @@ export function BankPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-3">Memory Bank</h1>
           <p className="text-white/60 max-w-2xl">
-            A persistent, decentralized record of every image encountered by every TRACE agent.
+            A persistent, decentralized record of every media file encountered by every TRACE agent.
             Stored in MemWal on Walrus. Never forgets. Grows with every page browse.
           </p>
         </motion.div>
@@ -124,7 +124,7 @@ export function BankPage() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           {[
             {
-              label: "Images Encountered",
+              label: "Media Encountered",
               sub:   "Across all sites · growing",
               value: stats?.total_sightings ?? 0,
               color: "text-white",
@@ -168,7 +168,7 @@ export function BankPage() {
           <motion.div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-center"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
             <p className="text-white/60 text-sm">
-              <span className="text-white font-bold">{stats.total_sightings.toLocaleString()}</span> images encountered · {" "}
+              <span className="text-white font-bold">{stats.total_sightings.toLocaleString()}</span> media files encountered · {" "}
               <span className="text-emerald-400 font-bold">{stats.total_verified.toLocaleString()}</span> cryptographically proven · {" "}
               <span className="text-rose-400 font-bold">{unverified.toLocaleString()}</span> unverified
               <span className="text-white/40"> — this is why TRACE exists</span>
@@ -289,7 +289,7 @@ export function BankPage() {
           </p>
           <div className="flex gap-3 mb-4">
             <input value={query} onChange={e => setQuery(e.target.value)}
-              placeholder="e.g. verified images from BBC"
+              placeholder="e.g. verified media from BBC"
               className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50" />
             <Button onClick={doRecall} disabled={recalling}
               className="bg-violet-600 hover:bg-violet-500 text-white shrink-0">

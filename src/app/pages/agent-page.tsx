@@ -88,8 +88,8 @@ export function AgentPage() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
           {[
             { icon: Activity,   step: "01", title: "Monitor",  desc: "Scans news sources for new media every 5 minutes" },
-            { icon: Shield,     step: "02", title: "Verify",   desc: "Calls TRACE API to verify each image cryptographically" },
-            { icon: Database,   step: "03", title: "Remember", desc: "Stores memory of every seen image on Walrus permanently" },
+            { icon: Shield,     step: "02", title: "Verify",   desc: "Calls TRACE API to verify each media file cryptographically" },
+            { icon: Database,   step: "03", title: "Remember", desc: "Stores memory of every seen media file on Walrus permanently" },
             { icon: Bot,        step: "04", title: "Share",    desc: "Any agent reads memory via Walrus blob ID" },
           ].map((item) => (
             <div key={item.step} className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -160,7 +160,7 @@ export function AgentPage() {
                 <h2 className="font-semibold">Walrus Persistent Memory</h2>
               </div>
               <p className="text-sm text-white/60 mb-4">
-                The agent's complete memory — every image ever scanned, every verdict,
+                The agent's complete memory — every media file ever scanned, every verdict,
                 every pattern detected — is stored permanently on Walrus. Any AI agent
                 anywhere can load this memory and continue where this agent left off.
               </p>
@@ -198,8 +198,8 @@ export function AgentPage() {
             <div className="flex gap-3 mb-4">
               <input
                 id="recall-input"
-                defaultValue="AI generated images"
-                placeholder="e.g. AI generated images from BBC"
+                defaultValue="AI generated media"
+                placeholder="e.g. AI generated media from BBC"
                 className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-violet-500/50"
               />
               <Button
@@ -235,12 +235,12 @@ export function AgentPage() {
           </div>
         </motion.div>
 
-        {/* Try It — Verify Any Image URL */}
+        {/* Try It — Verify Any Media URL */}
         <motion.div className="mb-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <h2 className="font-semibold mb-2">Ask the Agent to Verify Any Image</h2>
+            <h2 className="font-semibold mb-2">Ask the Agent to Verify Any Media</h2>
             <p className="text-sm text-white/50 mb-5">
-              Paste any image URL — the agent verifies it, stores the result in Walrus memory,
+              Paste any media URL — the agent verifies it, stores the result in Walrus memory,
               and returns the verdict.
             </p>
             <div className="flex gap-3">
@@ -284,8 +284,8 @@ export function AgentPage() {
             <div className="space-y-3">
               {[
                 { method: "GET",  path: "/agent/status",  desc: "Current agent state and Walrus memory blob ID" },
-                { method: "GET",  path: "/agent/memory",  desc: "Full agent memory (all seen images + verdicts)" },
-                { method: "POST", path: "/agent/verify",  desc: "Ask agent to verify an image URL" },
+                { method: "GET",  path: "/agent/memory",  desc: "Full agent memory (all seen media + verdicts)" },
+                { method: "POST", path: "/agent/verify",  desc: "Ask agent to verify a media URL" },
                 { method: "GET",  path: "/agent/flagged", desc: "Patterns: repeated fakes, suspicious sources" },
               ].map((ep) => (
                 <div key={ep.path} className="flex items-start gap-3 text-sm">

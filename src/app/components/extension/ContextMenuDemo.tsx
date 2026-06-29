@@ -96,7 +96,7 @@ export function ContextMenuDemo() {
         transition={{ delay: 0.8 }}
         className="mt-4 text-center text-sm text-muted-foreground"
       >
-        Right-click any image or video on the web to verify with TRACE
+        Right-click any media on the web to verify with TRACE
       </motion.div>
     </div>
   );

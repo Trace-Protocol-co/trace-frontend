@@ -25,7 +25,7 @@ const mockNotifications: Notification[] = [
     id: '2',
     type: 'danger',
     title: 'Unverified Content Alert',
-    message: 'This image has no cryptographic proof and may be manipulated.',
+    message: 'This media has no cryptographic proof and may be manipulated.',
     url: 'news-site.com/article',
     timestamp: Date.now() - 1000,
   },

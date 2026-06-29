@@ -5,7 +5,7 @@ const steps = [
   {
     icon: MousePointer2,
     title: "Browse Normally",
-    description: "Visit any website with images or videos",
+    description: "Visit any website with media",
     color: "protocol",
   },
   {

@@ -179,7 +179,7 @@ export function SocialMediaMock() {
         <h4 className="font-semibold mb-2">Real-time Verification Across the Web</h4>
         <p className="text-sm text-muted-foreground">
           TRACE automatically scans media on Twitter, YouTube, Instagram, Facebook, Reddit, news sites,
-          and any webpage with images or videos. Verification happens in milliseconds using on-chain proofs.
+          and any webpage with media. Verification happens in milliseconds using on-chain proofs.
         </p>
       </motion.div>
     </div>
