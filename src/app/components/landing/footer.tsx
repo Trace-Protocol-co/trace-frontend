@@ -82,14 +82,14 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://suiexplorer.com/object/0x5dcd795b9b23e0344608b92d58f2a0c0438558243ce5db9c821292f90df9a54a?network=testnet"
+                <a href="https://suiexplorer.com/object/0xc8297d27fe04379529cae44e58c7980224dba603e022d8822ad9e832a481c20c?network=testnet"
                   target="_blank" rel="noopener noreferrer"
                   className="text-white/70 hover:text-emerald-400 transition-colors font-mono text-xs">
-                  Treasury: 0x5dcd...54a
+                  Treasury: 0xc829...c20c
                 </a>
               </li>
               <li className="text-white/30 text-xs font-mono">Network: Sui Testnet</li>
-              <li className="text-white/30 text-xs">Modules: media · delegation · staking</li>
+              <li className="text-white/30 text-xs">Modules: media · delegation · staking · seal_policy</li>
             </ul>
           </div>
         </div>
@@ -104,7 +104,7 @@ export function Footer() {
   />
 </Link>
           <div className="text-sm text-white/40 text-center">
-            © 2026 TRACE Protocol · Built on Sui + Walrus · 
+            © 2026 TRACE Protocol · Built on Sui + Walrus
           </div>
           <div className="flex gap-4 text-sm">
             <a href={GITHUB} target="_blank" rel="noopener noreferrer"
