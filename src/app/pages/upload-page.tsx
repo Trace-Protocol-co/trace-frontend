@@ -152,28 +152,24 @@ export function UploadPage() {
         }
       } catch { /* bank pre-check is non-critical */ }
 
-      // AI detection runs in background
-      setAiScore(-1);
-      setAiSignals([]);
+      // AI score estimation from file entropy
+      // AI detection — call backend which uses Sightengine if configured
+      try {
+        const aiForm = new FormData();
+        aiForm.append("file", f);
+        const aiRes  = await fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/detect-ai`, {
+          method: "POST", body: aiForm,
+        });
+        const aiData = await aiRes.json();
+        setAiScore(aiData.score ?? 0);
+        setAiSignals(aiData.signals ?? []);
+      } catch {
+        // Fall back to client-side detection if backend unavailable
+        const { score, signals } = await estimateAIScore(f);
+        setAiScore(score);
+        setAiSignals(signals);
+      }
       setPhase("idle");
-
-      (async () => {
-        try {
-          const aiForm = new FormData();
-          aiForm.append("file", f);
-          const aiRes = await fetch(
-            `${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/v1/detect-ai`,
-            { method: "POST", body: aiForm }
-          );
-          const aiData = await aiRes.json();
-          setAiScore(aiData.score ?? 0);
-          setAiSignals(aiData.signals ?? []);
-        } catch {
-          const { score, signals } = await estimateAIScore(f);
-          setAiScore(score);
-          setAiSignals(signals);
-        }
-      })();
     } catch {
       setError("Failed to compute file hash.");
       setPhase("error");
@@ -435,28 +431,22 @@ export function UploadPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-sm text-white font-medium">AI Content Analysis</div>
                       <div className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                        aiScore === -1 ? "bg-white/10 text-white/60 animate-pulse" :
                         aiScore > 7000 ? "bg-violet-500/20 text-violet-400" :
                         aiScore > 3000 ? "bg-amber-500/20 text-amber-400" :
                         "bg-emerald-500/20 text-emerald-400"
                       }`}>
-                        {aiScore === -1 ? "⏳ ANALYZING..." :
-                         aiScore > 7000 ? "⚠ LIKELY AI" :
-                         aiScore > 3000 ? "~ PARTIAL AI" : "✓ LIKELY HUMAN"}
+                        {aiScore > 7000 ? "⚠ LIKELY AI" : aiScore > 3000 ? "~ PARTIAL AI" : "✓ LIKELY HUMAN"}
                       </div>
                     </div>
                     <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden mb-2">
                       <div className={`h-full rounded-full transition-all duration-1000 ${
-                        aiScore === -1 ? "bg-white/30 animate-pulse" :
                         aiScore > 7000 ? "bg-violet-500" :
                         aiScore > 3000 ? "bg-amber-500" : "bg-emerald-500"
-                      }`} style={{ width: aiScore === -1 ? "100%" : `${aiScore / 100}%` }} />
+                      }`} style={{ width: `${aiScore / 100}%` }} />
                     </div>
                     <div className="flex justify-between text-xs text-white/30 mb-3">
                       <span>0% Human</span>
-                      <span className="text-white/50 font-medium">
-                        {aiScore === -1 ? "Checking with Sightengine..." : `${(aiScore / 100).toFixed(0)}% synthetic probability`}
-                      </span>
+                      <span className="text-white/50 font-medium">{(aiScore / 100).toFixed(0)}% synthetic probability</span>
                       <span>100% AI</span>
                     </div>
                     {/* Detection signals */}
@@ -513,7 +503,7 @@ export function UploadPage() {
                   </div>
 
                   <Button onClick={handleUpload}
-                    disabled={!file || phase === "uploading" || !isAuthenticated() || aiScore === -1}
+                    disabled={!file || phase === "uploading" || !isAuthenticated()}
                     className="w-full bg-white text-black hover:bg-white/90 py-6 text-base font-semibold disabled:opacity-40">
                     {!isAuthenticated() ? "Sign In Required" : "Anchor to Chain"}
                   </Button>
