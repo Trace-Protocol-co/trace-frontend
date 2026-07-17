@@ -2,7 +2,7 @@
  * TRACE — zkLogin Integration (Browser-compatible, no Node globals)
  */
 
-const SUI_RPC = "https://rpc.testnet.sui.io";
+const SUI_RPC = "https://sui-testnet.nodeinfra.com";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
 const APP_URL = (import.meta.env.VITE_APP_URL ?? window.location.origin).trim().replace(/\/$/, "");
 const SESSION_KEY = "trace_zklogin_session";
