@@ -27,7 +27,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Developers */}
+          {/* Developers */ }
           <div>
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/40">Developers</h3>
             <ul className="space-y-3 text-sm">
