@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { Bot, Activity, Shield, AlertTriangle, CheckCircle2, Database, ExternalLink, RefreshCw } from "lucide-react";
+import { Bot, Activity, Shield, AlertTriangle, CheckCircle2, Database, ExternalLink, RefreshCw, Copy, Check, Zap } from "lucide-react";
 import { Button } from "../components/ui/button";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
@@ -24,6 +24,13 @@ export function AgentPage() {
   const [verifying, setVerifying] = useState(false);
 
   const [recallResults, setRecallResults] = useState<{ text: string; blob_id: string; distance: number }[]>([]);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(key);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   const fetchStatus = async () => {
     try {
@@ -67,6 +74,72 @@ export function AgentPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-24">
+
+
+        {/* OKX.AI Marketplace Banner */}
+        <motion.div className="mb-10 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6"
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="size-4 text-amber-400" />
+                <span className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Now on OKX.AI Genesis Hackathon</span>
+              </div>
+              <h2 className="text-xl font-bold text-white mb-1">TRACE Media Verification ASP</h2>
+              <p className="text-sm text-white/60 max-w-xl">
+                Any AI agent can call TRACE to verify media authenticity before acting on it.
+                One API call returns a cryptographic verdict backed by 57,000+ sightings on Walrus.
+              </p>
+            </div>
+            <a href="https://www.okx.ai" target="_blank" rel="noopener noreferrer"
+              className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm px-5 py-2.5 transition-colors">
+              View on OKX.AI <ExternalLink className="size-3.5" />
+            </a>
+          </div>
+
+          {/* Quick integration */}
+          <div className="mt-6 rounded-xl bg-black/40 border border-white/10 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs text-white/40 font-mono">Agent Integration — Single API Call</span>
+              <button onClick={() => copyToClipboard(`curl -X POST https://trace-cbvb.onrender.com/agent/verify \\
+  -F "file=@image.jpg"`, "curl")}
+                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white transition-colors">
+                {copied === "curl" ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                {copied === "curl" ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <pre className="text-xs text-emerald-400 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">{
+`# Submit any image for verification
+curl -X POST https://trace-cbvb.onrender.com/agent/verify \
+  -F "file=@image.jpg"
+
+# Response
+{
+  "verdict": "UNVERIFIED",
+  "confidence": 0.31,
+  "summary": "This media has no registered provenance on the TRACE network...",
+  "action_recommendation": "UNKNOWN — no provenance found. Exercise caution.",
+  "ai_score": 3139,
+  "sighting_count": 1,
+  "powered_by": "TRACE Protocol — traceprotocol.co"
+}`}</pre>
+          </div>
+
+          {/* Verdict types */}
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { verdict: "VERIFIED_ORIGINAL", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", desc: "Cryptographic proof exists on Sui" },
+              { verdict: "MODIFIED",          color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20",   desc: "Altered from registered original" },
+              { verdict: "AI_GENERATED",      color: "text-violet-400",  bg: "bg-violet-500/10 border-violet-500/20", desc: "Synthetic content detected" },
+              { verdict: "UNVERIFIED",        color: "text-rose-400",    bg: "bg-rose-500/10 border-rose-500/20",     desc: "No provenance found" },
+            ].map((v) => (
+              <div key={v.verdict} className={`rounded-lg border p-3 ${v.bg}`}>
+                <div className={`text-xs font-mono font-bold mb-1 ${v.color}`}>{v.verdict}</div>
+                <div className="text-xs text-white/40">{v.desc}</div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
 
         {/* Header */}
         <motion.div className="mb-12" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
